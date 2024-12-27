@@ -4,11 +4,13 @@ import cors from "cors";
 import { pipeline, read_audio } from "@xenova/transformers";
 import multer from "multer";
 import fs from "fs";
+import dotenv from "dotenv";
 import axios from "axios";
 import path from "path";
 import { fileURLToPath } from "url";
 import fetch from "node-fetch";
 import wavefile from 'wavefile';
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -31,7 +33,7 @@ const upload = multer({ storage: storage });
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: process.env.FRONTEND_URL,
   methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
   credentials: true,
   allowedHeaders: [

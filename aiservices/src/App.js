@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {  Type, Image, FileText, Mic, MessageSquare, Languages, Volume2Icon } from 'lucide-react';
 import './App.css';
-
+const BACKEND_URL =
+  process.env.REACT_APP_BACKEND_URL;
 const App = () => {
   const [activeService, setActiveService] = useState('sentiment');
   const [loading, setLoading] = useState(false);
@@ -84,42 +85,48 @@ const App = () => {
       const headers = {};
 
       // Handle different types of requests based on service
-       if (['asr', 'image-classification', 'image-to-text'].includes(serviceId)) {
+      if (
+        ["asr", "image-classification", "image-to-text"].includes(serviceId)
+      ) {
         requestBody = JSON.stringify({ imageUrl: imageUrl || audioUrl });
-        headers['Content-Type'] = 'application/json';
+        headers["Content-Type"] = "application/json";
       } else {
         requestBody = JSON.stringify({ text: inputText });
-        headers['Content-Type'] = 'application/json';
+        headers["Content-Type"] = "application/json";
       }
 
       // Configure fetch options based on the service
       const fetchOptions = {
-        method: 'POST',
+        method: "POST",
         headers,
         body: requestBody,
       };
 
       // Set response type for binary data (e.g., audio file)
-      if (serviceId === 'text-to-speech') {
-        fetchOptions.headers['Accept'] = 'audio/wav';
+      if (serviceId === "text-to-speech") {
+        fetchOptions.headers["Accept"] = "audio/wav";
       }
 
-      const response = await fetch(`http://localhost:5000/api/${serviceId}`, fetchOptions);
+       const apiUrl = `${BACKEND_URL}/api/${serviceId}`;
+      // Log the request URL for debugging
+      console.log(`Calling endpoint: ${BACKEND_URL}/api/${serviceId}`);
+
+       const response = await fetch(apiUrl, fetchOptions);
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Service request failed');
+        throw new Error(errorData.error || "Service request failed");
       }
 
-      if (serviceId === 'text-to-speech') {
+      if (serviceId === "text-to-speech") {
         // Handle audio response and trigger download
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
 
         // Create a temporary link to download the file
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.download = 'generated_audio.wav'; // Filename
+        link.download = "generated_audio.wav"; // Filename
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
